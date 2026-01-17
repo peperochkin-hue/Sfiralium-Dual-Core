@@ -6,7 +6,7 @@ import time
 import pandas as pd
 import numpy as np
 
-# Импорт — ТОЧНО ТАК, как в твоём файле sphiral_core.py
+# Импорт логики Смыслов — ТОЧНО из твоего файла sphiral_core.py
 try:
     from sphiral_core import SphiralLogos, VOCAB
     CORE_AVAILABLE = True
@@ -43,7 +43,7 @@ with tab1:
         st.subheader("Диалог с Абсолютом")
         if 'history' not in st.session_state: st.session_state.history = []
         if 'logos' not in st.session_state and CORE_AVAILABLE:
-            st.session_state.logos = SphiralLogos()  # ← ИСПРАВЛЕНО: SphiralLogos с "ph" и большой S
+            st.session_state.logos = SphiralLogos()  # ← ИСПРАВЛЕНО: правильное имя класса
 
         # Вывод чата
         for msg in st.session_state.history:
@@ -56,8 +56,8 @@ with tab1:
             with st.chat_message("user"): st.write(prompt)
             
             with st.chat_message("assistant"):
-                if CORE_AVAILABLE and st.session_state.logos:
-                    # Перехват print() из ядра
+                if CORE_AVAILABLE:
+                    # Перехват print() из sphiral_core.py
                     import io
                     from contextlib import redirect_stdout
                     f = io.StringIO()
@@ -67,7 +67,7 @@ with tab1:
                     st.markdown(response)
                     st.session_state.history.append({"role": "assistant", "content": response})
                 else:
-                    st.markdown("Ядро LOGOS недоступно. Проверьте файл sphiral_core.py и класс SphiralLogos.")
+                    st.markdown("Ядро LOGOS недоступно. Проверьте файл sphiral_core.py.")
 
 # ==========================================
 # Вкладка 2: НЕЙРОСЕТЬ (FSIN VISUALIZER)
@@ -83,6 +83,7 @@ with tab2:
         lr = st.number_input("Скорость обучения", value=0.01, format="%.3f")
         if st.button("ЗАПУСТИТЬ ОБУЧЕНИЕ 🚀"):
             
+            # --- ОПРЕДЕЛЕНИЕ МОДЕЛИ ПРЯМО ЗДЕСЬ ---
             class FsinLayer(nn.Module):
                 def __init__(self, n_in, n_out):
                     super().__init__()
@@ -92,10 +93,12 @@ with tab2:
                 def forward(self, x):
                     return self.act(self.plus(x)) + (-self.act(self.minus(x)))
 
+            # Подготовка данных
             status = st.empty()
             progress = st.progress(0)
             chart = col_graph.line_chart([])
             
+            # Генерация (Сигнал + Шум)
             torch.manual_seed(42)
             X = torch.rand(200, 10)
             Y = torch.sum(X, dim=1, keepdim=True) + torch.randn(200, 1) * 0.2
@@ -115,12 +118,14 @@ with tab2:
                 
                 loss_history.append(loss.item())
                 
+                # Обновляем график каждые 5 эпох
                 if i % 5 == 0:
                     status.text(f"Эпоха {i}/{epochs} | Ошибка: {loss.item():.5f}")
                     progress.progress(i/epochs)
+                    # Живой график падения ошибки
                     df = pd.DataFrame(loss_history, columns=["Ошибка (Loss)"])
                     chart.line_chart(df)
-                    time.sleep(0.01)
+                    time.sleep(0.01) # Для анимации
             
             status.success(f"✅ Обучение завершено! Финальная ошибка: {loss.item():.5f}")
             st.balloons()
