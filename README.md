@@ -15,7 +15,6 @@
 - Книги:  
   ![Великий Предел](https://github.com/peperochkin-hue/Sfiralium-Dual-Core/raw/main/assets/great_limit.jpg)  
   ![Сфиральное время](https://github.com/peperochkin-hue/Sfiralium-Dual-Core/raw/main/assets/sfiral_time.jpg)  
-  (Загрузи обложки в папку assets, если хочешь — добавь их через "Add file" → "Create new folder" → assets)
 
 ### Установка и запуск
 ```bash
