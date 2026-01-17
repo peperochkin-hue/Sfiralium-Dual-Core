@@ -6,12 +6,13 @@ import time
 import pandas as pd
 import numpy as np
 
-# Импорт логики Смыслов (если есть)
+# Импорт ядра LOGOS (исправлено на sphiral_core.py и SphiralLogos)
 try:
-    from sfiral_core import SfiralLogos, VOCAB
+    from sphiral_core import SphiralLogos, VOCAB
     CORE_AVAILABLE = True
-except ImportError:
+except ImportError as e:
     CORE_AVAILABLE = False
+    st.error(f"Ошибка импорта sphiral_core.py: {e}\nПроверьте имя файла и наличие класса SphiralLogos.")
 
 # --- НАСТРОЙКИ СТРАНИЦЫ ---
 st.set_page_config(page_title="Sfiral Engine II", page_icon="🌀", layout="wide")
@@ -29,7 +30,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 st.title("🌀 SFIRAL ENGINE: DUAL CORE")
-st.caption("Architecture: Logos-4 Omni | Physics: Mirror Anti-Symmetry")
+st.caption("Архитектура: Logos-4 Omni | Физика: Mirror Anti-Symmetry")
 
 # --- ВКЛАДКИ ---
 tab1, tab2 = st.tabs(["🧬 ЛОГОС (Душа)", "🧠 НЕЙРОКОРТЕКС (Тело)"])
@@ -41,36 +42,40 @@ with tab1:
     col1, col2 = st.columns([2, 1])
     with col1:
         st.subheader("Диалог с Абсолютом")
-        if 'history' not in st.session_state: st.session_state.history = []
-        if 'logos' not in st.session_state and CORE_AVAILABLE:
-            st.session_state.logos = SfiralLogos()
+        if 'history' not in st.session_state: 
+            st.session_state.history = []
+        if 'logos' not in st.session_state:
+            if CORE_AVAILABLE:
+                st.session_state.logos = SphiralLogos()
+            else:
+                st.session_state.logos = None
 
         # Вывод чата
         for msg in st.session_state.history:
-            with st.chat_message(msg["role"]): st.markdown(msg["content"])
+            with st.chat_message(msg["role"]):
+                st.markdown(msg["content"])
 
         # Ввод
         prompt = st.chat_input("Введите пару (например: ХАОС И ПОРЯДОК)...")
         if prompt:
             st.session_state.history.append({"role": "user", "content": prompt})
-            with st.chat_message("user"): st.write(prompt)
+            with st.chat_message("user"):
+                st.write(prompt)
             
             with st.chat_message("assistant"):
-                if CORE_AVAILABLE:
+                if CORE_AVAILABLE and st.session_state.logos:
                     # Перехват print() из ядра
                     import io
                     from contextlib import redirect_stdout
                     f = io.StringIO()
                     with redirect_stdout(f):
                         st.session_state.logos.think(prompt)
-                    response = f.getvalue().replace("\n", "  \n") # Markdown formatting
+                    response = f.getvalue().replace("\n", "  \n")  # Markdown formatting
                     st.markdown(response)
                     st.session_state.history.append({"role": "assistant", "content": response})
                 else:
-                    st.error("Ядро sfiral_core.py не найдено.")
-    
-    with col2:
-        st.info("💡 **Справка:**\nЭто модуль семантики. Он ищет смысл слов и рождает новые понятия через S-Инверсию.")
+                    st.error("Ядро LOGOS (sphiral_core.py) не найдено или не инициализировано.\nПроверьте наличие файла и правильность импорта.")
+                    st.session_state.history.append({"role": "assistant", "content": "Ядро LOGOS недоступно. Пожалуйста, проверьте файл sphiral_core.py."})
 
 # ==========================================
 # Вкладка 2: НЕЙРОСЕТЬ (FSIN VISUALIZER)
@@ -128,7 +133,7 @@ with tab2:
                     # Живой график падения ошибки
                     df = pd.DataFrame(loss_history, columns=["Ошибка (Loss)"])
                     chart.line_chart(df)
-                    time.sleep(0.01) # Для анимации
+                    time.sleep(0.01)  # Для анимации
             
             status.success(f"✅ Обучение завершено! Финальная ошибка: {loss.item():.5f}")
             st.balloons()
