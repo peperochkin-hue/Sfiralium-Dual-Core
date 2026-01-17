@@ -6,13 +6,12 @@ import time
 import pandas as pd
 import numpy as np
 
-# Импорт логики Смыслов (исправлено на sphiral_core.py)
+# Импорт логики Смыслов (если есть)
 try:
-    from sphiral_core import SphiralLogos, VOCAB
+    from sfiral_core import SfiralLogos, VOCAB
     CORE_AVAILABLE = True
-except ImportError as e:
+except ImportError:
     CORE_AVAILABLE = False
-    st.error(f"Ошибка импорта sphiral_core.py: {e}\nПроверьте наличие файла и правильность импорта.")
 
 # --- НАСТРОЙКИ СТРАНИЦЫ ---
 st.set_page_config(page_title="Sfiral Engine II", page_icon="🌀", layout="wide")
@@ -44,7 +43,7 @@ with tab1:
         st.subheader("Диалог с Абсолютом")
         if 'history' not in st.session_state: st.session_state.history = []
         if 'logos' not in st.session_state and CORE_AVAILABLE:
-            st.session_state.logos = SphiralLogos()
+            st.session_state.logos = SfiralLogos()
 
         # Вывод чата
         for msg in st.session_state.history:
@@ -64,13 +63,14 @@ with tab1:
                     f = io.StringIO()
                     with redirect_stdout(f):
                         st.session_state.logos.think(prompt)
-                    response = f.getvalue().replace("\n", "  \n")  # Markdown formatting
+                    response = f.getvalue().replace("\n", "  \n") # Markdown formatting
                     st.markdown(response)
                     st.session_state.history.append({"role": "assistant", "content": response})
                 else:
-                    response = "Ядро LOGOS (sphiral_core.py) не найдено или не инициализировано. Проверьте импорт и наличие файла."
-                    st.error(response)
-                    st.session_state.history.append({"role": "assistant", "content": response})
+                    st.error("Ядро sfiral_core.py не найдено.")
+    
+    with col2:
+        st.info("💡 **Справка:**\nЭто модуль семантики. Он ищет смысл слов и рождает новые понятия через S-Инверсию.")
 
 # ==========================================
 # Вкладка 2: НЕЙРОСЕТЬ (FSIN VISUALIZER)
